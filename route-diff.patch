@@ -1,0 +1,122 @@
+diff --git a/src/lib/osrm-route.ts b/src/lib/osrm-route.ts
+new file mode 100644
+index 0000000..e69de29
+--- /dev/null
++++ b/src/lib/osrm-route.ts
+@@
++import type MapLibreGL from "maplibre-gl";
++
++export type OsrmRoute = {
++  geometry: GeoJSON.LineString;
++  distance: number;
++  duration: number;
++};
++
++export async function getRoute(
++  start: [number, number],
++  end: [number, number],
++): Promise<OsrmRoute> {
++  const url = `https://router.project-osrm.org/route/v1/driving/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson`;
++
++  const res = await fetch(url);
++  if (!res.ok) {
++    throw new Error(`OSRM request failed: ${res.status} ${res.statusText}`);
++  }
++
++  const data = await res.json();
++  const route = data?.routes?.[0];
++
++  if (!route) {
++    throw new Error("No route returned from OSRM");
++  }
++
++  return route;
++}
++
++export async function drawRoute(
++  map: MapLibreGL.Map,
++  start: [number, number],
++  end: [number, number],
++) {
++  const route = await getRoute(start, end);
++
++  const geojson: GeoJSON.Feature<GeoJSON.LineString> = {
++    type: "Feature",
++    geometry: route.geometry,
++    properties: {},
++  };
++
++  if (map.getSource("route")) {
++    if (map.getLayer("route")) {
++      map.removeLayer("route");
++    }
++    map.removeSource("route");
++  }
++
++  map.addSource("route", {
++    type: "geojson",
++    data: geojson,
++  });
++
++  map.addLayer({
++    id: "route",
++    type: "line",
++    source: "route",
++    layout: {
++      "line-join": "round",
++      "line-cap": "round",
++    },
++    paint: {
++      "line-color": "#00ffcc",
++      "line-width": 4,
++      "line-opacity": 0.9,
++    },
++  });
++
++  return route;
++}
++
+ diff --git a/src/app/(main)/mymap/page.tsx b/src/app/(main)/mymap/page.tsx
+index e69de29..0000000 100644
+--- a/src/app/(main)/mymap/page.tsx
++++ b/src/app/(main)/mymap/page.tsx
+@@
+-import { Map, MapControls } from "@/registry/map";
+-
+-export default function MyMap() {
+-  return (
+-    <div className="h-screen w-full">
+-      <Map center={[-74.006, 40.7128]} zoom={11}>
+-        <MapControls />
+-      </Map>
+-    </div>
+-  );
+-}
++"use client";
++
++import { useEffect, useRef } from "react";
++import { Map, MapControls, type MapRef } from "@/registry/map";
++import { drawRoute } from "@/lib/osrm-route";
++
++const START: [number, number] = [-74.006, 40.7128];
++const END: [number, number] = [-73.935242, 40.73061];
++
++export default function MyMap() {
++  const mapRef = useRef<MapRef | null>(null);
++
++  useEffect(() => {
++    if (!mapRef.current) return;
++
++    drawRoute(mapRef.current, START, END).catch((error) => {
++      console.error("Route drawing failed:", error);
++    });
++  }, []);
++
++  return (
++    <div className="h-screen w-full">
++      <Map ref={mapRef} center={START} zoom={11}>
++        <MapControls />
++      </Map>
++    </div>
++  );
++}
