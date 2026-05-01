@@ -1,4 +1,4 @@
-<h1 align="center">mapcn</h1>
+<!-- <h1 align="center">mapcn</h1>
 
 <p align="center">
   Free & open-source, ready-to-use, customizable map components for React.<br/>
@@ -64,4 +64,4 @@ MIT License - see the [LICENSE](LICENSE) file for details.
    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=AnmolSaini16/mapcn&type=date&legend=top-left" />
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=AnmolSaini16/mapcn&type=date&legend=top-left" />
  </picture>
-</a>
+</a> -->
