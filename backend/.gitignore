@@ -48,9 +48,7 @@ env/
 .coverage
 htmlcov/
 
-# Local model artifacts (do NOT commit large binaries)
-models/
-*.pth
+
 
 # Logs and runtime
 *.log

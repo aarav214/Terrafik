@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     supabase_url: str = Field(validation_alias=AliasChoices("SUPABASE_URL"))
     supabase_anon_key: str = Field(validation_alias=AliasChoices("SUPABASE_ANON_KEY"))
     supabase_service_role_key: str = Field(validation_alias=AliasChoices("SUPABASE_SERVICE_ROLE_KEY"))
+    groq_api_key: str | None = Field(default=None, validation_alias=AliasChoices("GROQ_API_KEY"))
     cors_origins: list[str] = Field(default_factory=lambda: ["*"], validation_alias=AliasChoices("CORS_ORIGINS"))
 
 

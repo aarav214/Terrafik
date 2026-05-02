@@ -44,33 +44,29 @@ ls -lh backend/models/road_model.pth
 
 ### Step 2: Create Environment Configuration
 
-Create `backend/.env` with your Supabase credentials:
+Create `backend/.env` from the example template and fill in your Supabase + Groq credentials:
 
 ```bash
 cd backend
 
-# Create .env file
-cat > .env << 'EOF'
-# Supabase Configuration (Required)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Create .env from the template
+cp .env.example .env
 
-# CORS Origins (Optional - adjust for your frontend)
-CORS_ORIGINS=["http://localhost:3000", "http://localhost:5173"]
-EOF
+# Edit the file and set real values
+${EDITOR:-nano} .env
 
 # Verify file created
 cat .env
 ```
 
-**Where to get Supabase credentials:**
+**Where to get credentials:**
 1. Go to https://supabase.com/dashboard
 2. Select your project
 3. Settings → API
-4. Copy the three keys above
+4. Copy the three Supabase keys above
+5. Create a Groq API key at https://console.groq.com/ and add it as `GROQ_API_KEY`
 
-✅ **Expected:** `.env` file contains three valid Supabase keys
+✅ **Expected:** `.env` file contains Supabase keys and `GROQ_API_KEY`
 
 ---
 
@@ -153,6 +149,8 @@ What this creates:
 - Row-Level Security (users see only their data)
 - Performance indexes
 
+The issue-report endpoint also stores demo submissions in an in-memory list for simple hackathon demos.
+
 ---
 
 ### Step 6: Start the Backend Server
@@ -165,6 +163,9 @@ source venv/bin/activate
 
 # Start FastAPI server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# If you are running from the repo root, use:
+# PYTHONPATH=backend backend/.venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 **Expected output:**
@@ -220,6 +221,24 @@ This opens **Swagger UI** where you can:
 - Test with real data
 - View responses
 - Check error codes
+
+### New Report Flow
+
+`POST /report-issue`
+
+Form fields:
+- `image`: jpg/png road image
+- `latitude`: latitude coordinate
+- `longitude`: longitude coordinate
+
+Authentication:
+- `Authorization: Bearer <token>`
+
+Behavior:
+- Runs ML prediction first
+- Builds structured input for Groq Llama 3
+- Returns `issue_type`, `severity`, and `complaint`
+- Uses the authenticated login email, not a client-supplied email
 
 ### Option 2: Direct URL
 

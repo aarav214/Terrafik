@@ -26,3 +26,10 @@ class PredictionErrorResponse(BaseModel):
     """Response model for prediction errors"""
     detail: str
     error_type: str | None = None
+
+
+class ReportIssueResponse(BaseModel):
+    """Response model for issue reports generated from prediction + LLM"""
+    issue_type: str
+    severity: str
+    complaint: str

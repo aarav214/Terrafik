@@ -1,6 +1,6 @@
 # Road Brain Backend
 
-Minimal FastAPI backend using Supabase Auth.
+FastAPI backend for road issue prediction, issue reporting, and Supabase Auth.
 
 ## Setup (quick)
 
@@ -14,16 +14,22 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-2. Create `.env` with your Supabase credentials (do NOT commit this file):
+2. Create `.env` from the example file and fill in your credentials:
 
 ```bash
-cat > .env << 'EOF'
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-CORS_ORIGINS=["http://localhost:3000"]
-EOF
+cp .env.example .env
+# then edit .env and set real values
 ```
+
+Required environment variables:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+Optional but recommended for issue reports:
+
+- `GROQ_API_KEY`
 
 3. Place the ML model (keep out of git):
 
@@ -40,6 +46,10 @@ cp /path/to/road_model.pth models/road_model.pth
 ```bash
 source venv/bin/activate
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# If you are starting from the repo root instead of backend/
+# use:
+# PYTHONPATH=backend backend/.venv/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## Endpoints (selected)
@@ -47,13 +57,17 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - `POST /signup`
 - `POST /login`
 - `GET /me` (protected — requires `Authorization: Bearer <token>`)
+- `POST /predictions/predict` (protected — image upload)
+- `POST /report-issue` (protected — image + latitude + longitude)
 
 ## Testing
 
 - Open Swagger UI: `http://localhost:8000/docs` and use the Authorize button to set a Bearer token.
 - Use `POST /predictions/predict` with form field `file` and a valid token to create predictions.
+- Use `POST /report-issue` with form fields `image`, `latitude`, and `longitude`; the backend uses the authenticated login email.
 
 ## Troubleshooting
 
 - If you see `Model file not found`, ensure `models/road_model.pth` exists in `backend/models/`.
 - If inserts fail with RLS errors, ensure the backend is using the service role key for trusted writes (server-only).
+- If issue reporting falls back to a basic complaint, ensure `GROQ_API_KEY` is set and reachable.
