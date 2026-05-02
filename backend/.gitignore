@@ -47,3 +47,17 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local model artifacts (do NOT commit large binaries)
+models/
+*.pth
+
+# Logs and runtime
+*.log
+logs/
+
+# MyPy/cache
+.mypy_cache/
+
+# SQLite
+*.sqlite3

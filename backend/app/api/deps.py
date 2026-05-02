@@ -1,7 +1,8 @@
 from typing import Any
 import logging
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from supabase import Client
 
 from app.core.supabase import get_supabase_service_client
@@ -9,18 +10,18 @@ from app.core.supabase import get_supabase_service_client
 logger = logging.getLogger(__name__)
 
 
-def get_bearer_token(authorization: str | None = Header(default=None)) -> str:
-    if not authorization:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing Authorization header",
-        )
+# Use FastAPI's HTTPBearer so OpenAPI/Swagger shows the "Authorize" button
+http_bearer = HTTPBearer(bearerFormat="Bearer")
 
-    scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token.strip():
+
+def get_bearer_token(
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+) -> str:
+    token = getattr(credentials, "credentials", None)
+    if not token or not token.strip():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authorization header must use Bearer token",
+            detail="Missing or invalid bearer token",
         )
 
     return token.strip()
