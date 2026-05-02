@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.prediction import report_router as report_issue_router
 from app.api.routes.prediction import router as prediction_router
 from app.core.config import get_settings
 
@@ -19,6 +20,7 @@ settings = get_settings()
 # Simple in-memory rate limiter state: per-IP deque of recent request timestamps
 # Note: in-memory limiter is process-local and intended for development/testing.
 app.state.rate_limits = {}
+app.state.issue_reports = []
 
 app.add_middleware(
     CORSMiddleware,
@@ -79,3 +81,4 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 app.include_router(auth_router)
 app.include_router(prediction_router)
+app.include_router(report_issue_router)
